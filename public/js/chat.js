@@ -1,15 +1,20 @@
-const socket = io();
+// const socket = io();
 
-socket.on('chatMessage', (msg) => {
-	console.log(msg);
-});
+// socket.on('chatMessage', (msg) => {
+// 	console.log(msg);
+// });
 
 //using closures and IIFEs
 
 //UI Controller
 
+/**
+ * @static
+ * @private
+ * @returns {object} getDomStrings
+ *
+ */
 let uiController = (() => {
-	//private
 	let allDomStrings = {
 		chatForm: '.chat-form',
 		message: '.message',
@@ -30,10 +35,15 @@ let uiController = (() => {
 })();
 
 //Socket Controller
+/**
+ * @static
+ * @private
+ * @returns {object} socket
+ */
 let socketController = (() => {
 	let socket = io();
 
-	socket.on('chatMessage', (msg) => {
+	socket.on('botMessage', (msg) => {
 		console.log(msg);
 		console.log('chatMessage');
 	});
@@ -48,12 +58,18 @@ let socketController = (() => {
 	};
 })();
 
-//App Controller
+/**
+ * @static
+ * @private
+ * @returns {object} init
+ */
 let appController = ((uiController, socketController) => {
-	let dom = uiController.getInputs();
+	const { chatForm } = uiController.getDomStrings();
+
+	// let dom = uiController.getInputs();
 
 	let eventListeners = () => {
-		dom.chatForm.addEventListener('submit', (e) => {
+		chatForm.addEventListener('submit', (e) => {
 			e.preventDefault();
 
 			let message = dom.message.value;
