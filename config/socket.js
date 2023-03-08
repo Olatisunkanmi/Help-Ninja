@@ -2,19 +2,12 @@ const socket = require('socket.io');
 const Helper = require('./helper');
 const cors = require('cors');
 
-/**
- * @class Socket
- * @classdesc Socket class
- * @param {object} server
- * @returns {object} io
- * @constructor Socket
- */
 class Socket {
 	constructor(server) {
 		this.io = socket(server, { cors: { origin: '*' } });
 		this.botName = 'Help Ninja Bot';
 		this.userName = 'Olasunkanmi';
-		this.io = this.initializeSocket();
+		this.initializeSocket();
 	}
 
 	/**
@@ -119,14 +112,11 @@ class Socket {
 	// 	this.io.to(userId).emit(event, data);
 	// }
 
-	/**
-	 * @static
-	 * @function createSocket
-	 * @param {object} server
-	 * @memberof Socket
-	 * @returns {object} io - returns socket.io instance
-	 *
-	 */
+	_listenbotMessage(socket) {
+		socket.on('botMessage', (msg) => {
+			console.log('Bot message', msg);
+		});
+	}
 
 	initializeSocket() {
 		// Run when client connects
@@ -137,39 +127,17 @@ class Socket {
 			// Emit bot message
 			this._emitBotMessage(socket, 'Welcome to Help Ninja');
 
-			// Broadcast to chatroom
-			this._broadcastNotification(
-				socket,
-				'A User has joined the chat',
-			);
-
 			// Emit to the new user only
 			this._emitNotification(socket, 'You have joined the chat');
 
-			//Emit when user disconnects
-			this._emitDisconnect(socket, 'A User has left the chat');
+			// socket.on('chatMessage', (msg) => {
+			// 	this.io.emit('userMessage', Helper('USER', msg));
+			// });
 
-			// Listen for chatMessage
+			// Listen to chat message from user
 			this._listenToChatMessage(socket);
-
-			// Listen for register
-			this._listenRegister(socket);
 		});
 	}
-
-	/**
-	 * @static
-	 * @function createSocket
-	 * @param {object} server
-	 * @memberof Socket
-	 * @returns {object} io - returns socket.io instance
-	 * @description Creates a socket instance
-	 */
-	// static createSocket(server) {
-	// 	const socketInstance = new Socket(server);
-
-	// 	return socketInstance.initializeSocket();
-	// }
 }
 
 module.exports = Socket;
