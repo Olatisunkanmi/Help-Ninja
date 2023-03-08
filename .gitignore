@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+public/images/nin.png
+public/images/sign_in.svg
+public/images/sign_up.svg

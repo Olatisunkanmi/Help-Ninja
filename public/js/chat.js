@@ -1,86 +1,203 @@
-// const socket = io();
+// This file is for the chat page
+//Use closure to protect variables
 
-// socket.on('chatMessage', (msg) => {
-// 	console.log(msg);
-// });
-
-//using closures and IIFEs
-
-//UI Controller
+/***********************UI CONTROLLER*********************** */
 
 /**
  * @static
  * @private
  * @returns {object} getDomStrings
- *
+ * @mem+berof uiController
  */
 let uiController = (() => {
+	//All DOM Strings
 	let allDomStrings = {
+		/**
+		 * @param {string} chatForm - The chat form
+		 * @param {string} message - The message input
+		 * @param {string} chatThread - The chat thread
+		 */
+
 		chatForm: '.chat-form',
 		message: '.message',
 		chatThread: '.chat-thread',
+		notification: '.notification',
 	};
 
+	//Get all inputs
 	return {
-		getInputs: function () {
-			return {
+		getInputs: () =>
+			/**
+			 * @static
+			 * @private
+			 * @returns {object} chatForm, message, chatThread
+			 * @summary Get all inputs
+			 * @memberof uiController
+			 */
+			({
 				chatForm: document.querySelector(allDomStrings.chatForm),
 				message: document.querySelector(allDomStrings.message),
 				chatThread: document.querySelector(allDomStrings.chatThread),
+				notificationThread: document.querySelector(
+					allDomStrings.notification,
+				),
+			}),
+
+		appendMessage: () => {
+			//create HTML string with placeholder text
+			let html, newHtml, element;
+
+			return {
+				appendChat: (message) => {
+					//choose the element to insert the HTML into
+					element = allDomStrings.chatThread;
+
+					//create HTML string with placeholder text
+					//if the message is from the user
+					if (message.username.includes('Bot')) {
+						html =
+							'<li> <div class="botMessages anim-typewriter"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
+					} else {
+						html =
+							'<li> <div class="messages"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
+					}
+
+					//replace the placeholder text with some actual data
+					newHtml = html.replace('%username%', message.username);
+					newHtml = newHtml.replace('%message%', message.text);
+					newHtml = newHtml.replace('%time%', message.time);
+
+					//insert the HTML into the DOM
+					document
+						.querySelector(element)
+						.insertAdjacentHTML('beforeend', newHtml);
+				},
+
+				appendNotification: (message) => {
+					html =
+						'<li> <div class="notification"> <div class="notify">%message%</div></div> </li>';
+
+					//choose the element to insert the HTML into
+					element = allDomStrings.chatThread;
+					//
+					//replace the placeholder text with some actual data
+					newHtml = html.replace('%message%', message.text);
+
+					//insert the HTML into the DOM
+					document
+						.querySelector(element)
+						.insertAdjacentHTML('beforeend', newHtml);
+				},
 			};
 		},
 
+		/**
+		 * @private
+		 * @returns {object} allDomStrings
+		 */
 		getDomStrings: () => allDomStrings,
 	};
 })();
 
-//Socket Controller
+/***********************SOCKET CONTROLLER*********************** */
+
 /**
  * @static
  * @private
+ * @function socketController
  * @returns {object} socket
  */
+
 let socketController = (() => {
 	let socket = io();
 
-	socket.on('botMessage', (msg) => {
-		console.log(msg);
-		console.log('chatMessage');
-	});
+	/**
+	 * @private
+	 * @listens for botMessage
+	 * @emits botMessage
+	 * @returns {object} message
+	 */
+	socket.on('botMessage', (msg) => msg);
 
-	socket.on('message', (msg) => {
-		console.log(msg);
-		console.log('message');
-	});
+	/**
+	 * @private
+	 * @listens for notification
+	 * @emits notification
+	 * @returns {object} message
+	 */
+	socket.on('notification', (msg) => msg);
+
+	/**
+	 * @private
+	 * @listens when a user connects
+	 * @emits access
+	 * @returns {object} message
+	 * @memberof socketController
+	 */
+	socket.on('access', (msg) => msg);
+
+	/**
+	 * @private
+	 * @listens when chatbot sends a message
+	 * @emits message
+	 * @returns {object} message
+	 * @memberof socketController
+	 */
+	socket.on('userMessage', (msg) => msg);
 
 	return {
-		socket: socket,
+		getSocket: () => socket,
 	};
 })();
+
+/***************APP CONTROLLER */
 
 /**
  * @static
  * @private
  * @returns {object} init
+ * @summary This is the main controller
+ *	@memberof appController
  */
 let appController = ((uiController, socketController) => {
-	const { chatForm } = uiController.getDomStrings();
+	const socket = socketController.getSocket();
+	const { appendMessage, getInputs } = uiController;
+	const { appendChat, appendNotification } = appendMessage();
+	const { chatForm } = getInputs();
 
-	// let dom = uiController.getInputs();
+	/**
+	 * @private
+	 * @returns {object} eventListeners
+	 * @summary This is the main controller
+	 * @memberof appController
+	 */
+	const init = () => {
+		socket.on('botMessage', (message) => {
+			appendChat(message);
+		});
 
-	let eventListeners = () => {
-		chatForm.addEventListener('submit', (e) => {
-			e.preventDefault();
+		socket.on('notification', (message) => {
+			appendNotification(message);
+		});
 
-			let message = dom.message.value;
-
-			socketController.socket.emit('chatMessage', message);
+		socket.on('userMessage', (message) => {
+			appendChat(message);
 		});
 	};
 
+	//Listen to user chat input
+	chatForm.addEventListener('keypress', (e) => {
+		if (e.keyCode === 13) {
+			//Enter key
+			e.preventDefault();
+			socket.emit('chatMessage', e.target.value);
+			e.target.value = '';
+		}
+	});
+
 	return {
 		init: () => {
-			eventListeners();
+			init();
 		},
 	};
 })(uiController, socketController);

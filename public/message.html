@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Welcome to Ninja Bot</title>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+
+		<!-- STYLE CSS -->
+		<link rel="stylesheet" href="css/chat.css" />
+	</head>
+
+	<body class="welcome-body">
+		<div class="wrapper">
+			<ul class="chat-thread">
+				<!-- <li> -->
+				<!-- <div class="notification">
+						<span class="notify">This is a notification </span>
+					</div> -->
+				<!-- </li> -->
+				<!-- <li><div class="userMessages">This is a chat</div></li> -->
+			</ul>
+
+			<div class="chat-form chat-window">
+				<input
+					placeholder="Enter Chat"
+					class="chat-window-message"
+					name="chat-window-message"
+					type="text"
+					autocomplete="off"
+					autofocus
+				/>
+			</div>
+		</div>
+		<!-- JS -->
+		<script defer src="/socket.io/socket.io.js"></script>
+		<script defer src="js/chat.js"></script>
+	</body>
+</html>
