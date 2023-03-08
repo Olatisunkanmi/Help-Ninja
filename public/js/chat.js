@@ -113,7 +113,7 @@ let socketController = (() => {
 
 	/**
 	 * @private
-	 * @listens for botMessage
+	 * @listens for botMessage -  when the chatbot sends a message
 	 * @emits botMessage
 	 * @returns {object} message
 	 */
@@ -121,7 +121,7 @@ let socketController = (() => {
 
 	/**
 	 * @private
-	 * @listens for notification
+	 * @listens for notification - when the chatbot sends a notification
 	 * @emits notification
 	 * @returns {object} message
 	 */
@@ -129,7 +129,7 @@ let socketController = (() => {
 
 	/**
 	 * @private
-	 * @listens when a user connects
+	 * @listens when a user connects to the chatRoom
 	 * @emits access
 	 * @returns {object} message
 	 * @memberof socketController
@@ -138,7 +138,7 @@ let socketController = (() => {
 
 	/**
 	 * @private
-	 * @listens when chatbot sends a message
+	 * @listens when a user sends a message in the chatRoom
 	 * @emits message
 	 * @returns {object} message
 	 * @memberof socketController
@@ -150,7 +150,7 @@ let socketController = (() => {
 	};
 })();
 
-/***************APP CONTROLLER */
+/***************APP CONTROLLER **************************************/
 
 /**
  * @static
