@@ -6,8 +6,6 @@
  */
 
 class SocketHelper {
-	_displayOptions(message) {}
-
 	/**
 	 * @private
 	 * @function _runBot - runs the chatbot
