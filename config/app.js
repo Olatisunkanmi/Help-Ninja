@@ -2,14 +2,14 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cors = require('cors');
-const Socket = require('./socket');
+const Socket = require('../app/socket/socket');
 
 const appConfig = async (app) => {
 	// Set up server
 	const server = http.createServer(app);
 
 	// Set up socket
-	const io = Socket.createSocket(server);
+	Socket.createSocket(server);
 
 	// Set static files
 	app.use(express.static(path.join(__dirname, '../public')));
