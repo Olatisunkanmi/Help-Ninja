@@ -1,5 +1,6 @@
 const socket = require('socket.io');
 const Helper = require('./helper');
+const socketHelper = require('./socketHepler');
 const cors = require('cors');
 
 class Socket {
@@ -7,7 +8,6 @@ class Socket {
 		this.io = socket(server, { cors: { origin: '*' } });
 		this.botName = 'Help Ninja Bot';
 		this.userName = 'Olasunkanmi';
-		this.initializeSocket();
 	}
 
 	/**
@@ -79,6 +79,21 @@ class Socket {
 
 	/**
 	 * @private
+	 * @function _runBot
+	 * @param {object} socket
+	 * @param {object} msg - Bot response to user message
+	 * @memberof Socket
+	 * @returns {function} _emitBotMessage - returns bot message to the chatroom
+	 */
+	_runBot = (socket, msg) => {
+		let { botResponse, displayOptions } = socketHelper._runBot(msg);
+		this._emitBotMessage(socket, botResponse);
+
+		displayOptions ? this._displayOptions(socket) : null;
+	};
+
+	/**
+	 * @private
 	 * @function _listenToChatMessage
 	 * @param {object} socket
 	 * @listens for chatMessage - when a user sends a message
@@ -90,6 +105,8 @@ class Socket {
 	_listenToChatMessage(socket) {
 		socket.on('chatMessage', (msg) => {
 			this._emitUserMessage(socket, msg);
+
+			this._runBot(socket, msg);
 		});
 	}
 
@@ -118,25 +135,66 @@ class Socket {
 		});
 	}
 
+	_displayOptions(socket) {
+		this._emitNotification(socket, 'Please select an option');
+		this._emitNotification(socket, '1. Register');
+		this._emitNotification(socket, '99. To checkout order');
+		this._emitNotification(socket, '98, To view Order History');
+		this._emitNotification(socket, '97, To view Current Order');
+		this._emitNotification(socket, '96, To view Order Status');
+	}
+
+	/**
+	 * @private
+	 * @function initializeSocket
+	 * @memberof Socket
+	 * @returns {function} _listenRegister - listens for register
+	 * @returns {function} _emitNotification - emits notification to the chatroom
+	 * @returns {function} _emitBotMessage - emits bot message to the chatroom
+	 * @returns {function} _listenToChatMessage - listens for chat message
+	 * @description Initializes socket
+	 * @listens for connection
+	 * @emits userMessage
+	 * @emits botMessage
+	 * @emits notification
+	 * @emits disconnect
+	 * @emits access
+	 */
+
 	initializeSocket() {
 		// Run when client connects
 		this.io.on('connection', (socket) => {
-			// Listen to new user connection
-			logger.info(`New User Connected ${socket.id}`);
+			// Listen for register
+			this._listenRegister(socket);
+
+			// Emit to the new user only
+			this._emitNotification(
+				socket,
+				'Hello, you are connected to Help Ninja',
+			);
+
+			//Emit options to user
+			this._displayOptions(socket);
 
 			// Emit bot message
 			this._emitBotMessage(socket, 'Welcome to Help Ninja');
 
-			// Emit to the new user only
-			this._emitNotification(socket, 'You have joined the chat');
-
-			// socket.on('chatMessage', (msg) => {
-			// 	this.io.emit('userMessage', Helper('USER', msg));
-			// });
-
 			// Listen to chat message from user
 			this._listenToChatMessage(socket);
 		});
+	}
+
+	/**
+	 * @static
+	 * @function createSocket
+	 * @param {object} server- server instance
+	 * @memberof Socket
+	 * @returns {object} socketInstance - returns socket instance
+	 * @description Creates a socket instance
+	 */
+	static createSocket(server) {
+		const socketInstance = new Socket(server);
+		return socketInstance.initializeSocket();
 	}
 }
 
