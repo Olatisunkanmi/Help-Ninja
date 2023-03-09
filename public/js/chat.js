@@ -7,7 +7,7 @@
  * @static
  * @private
  * @returns {object} getDomStrings
- * @mem+berof uiController
+ * @membof uiController
  */
 let uiController = (() => {
 	//All DOM Strings
@@ -47,6 +47,21 @@ let uiController = (() => {
 			//create HTML string with placeholder text
 			let html, newHtml, element;
 
+			function appendDOM(message, html) {
+				//choose the element to insert the HTML into
+				element = allDomStrings.chatThread;
+
+				//replace the placeholder text with some actual data
+				newHtml = html.replace('%username%', message.username);
+				newHtml = newHtml.replace('%message%', message.text);
+				newHtml = newHtml.replace('%time%', message.time);
+
+				//insert the HTML into the DOM
+				document
+					.querySelector(element)
+					.insertAdjacentHTML('beforeend', newHtml);
+			}
+
 			return {
 				appendChat: (message) => {
 					//choose the element to insert the HTML into
@@ -62,31 +77,14 @@ let uiController = (() => {
 							'<li> <div class="messages"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
 					}
 
-					//replace the placeholder text with some actual data
-					newHtml = html.replace('%username%', message.username);
-					newHtml = newHtml.replace('%message%', message.text);
-					newHtml = newHtml.replace('%time%', message.time);
-
-					//insert the HTML into the DOM
-					document
-						.querySelector(element)
-						.insertAdjacentHTML('beforeend', newHtml);
+					appendDOM(message, html);
 				},
 
 				appendNotification: (message) => {
 					html =
 						'<li> <div class="notification"> <div class="notify">%message%</div></div> </li>';
 
-					//choose the element to insert the HTML into
-					element = allDomStrings.chatThread;
-					//
-					//replace the placeholder text with some actual data
-					newHtml = html.replace('%message%', message.text);
-
-					//insert the HTML into the DOM
-					document
-						.querySelector(element)
-						.insertAdjacentHTML('beforeend', newHtml);
+					appendDOM(message, html);
 				},
 			};
 		},
@@ -163,7 +161,7 @@ let appController = ((uiController, socketController) => {
 	const socket = socketController.getSocket();
 	const { appendMessage, getInputs } = uiController;
 	const { appendChat, appendNotification } = appendMessage();
-	const { chatForm } = getInputs();
+	const { chatForm, chatThread } = getInputs();
 
 	/**
 	 * @private
@@ -174,14 +172,20 @@ let appController = ((uiController, socketController) => {
 	const init = () => {
 		socket.on('botMessage', (message) => {
 			appendChat(message);
+
+			scrollToBottom();
 		});
 
 		socket.on('notification', (message) => {
 			appendNotification(message);
+
+			scrollToBottom();
 		});
 
 		socket.on('userMessage', (message) => {
 			appendChat(message);
+
+			scrollToBottom();
 		});
 	};
 
@@ -194,6 +198,11 @@ let appController = ((uiController, socketController) => {
 			e.target.value = '';
 		}
 	});
+
+	//scroll to bottom of chat
+	const scrollToBottom = () => {
+		chatThread.scrollTop = chatThread.scrollHeight;
+	};
 
 	return {
 		init: () => {
