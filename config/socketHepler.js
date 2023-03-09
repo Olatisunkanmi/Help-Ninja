@@ -17,7 +17,7 @@ class SocketHelper {
 	static _runBot(msg) {
 		const message = msg.toLowerCase();
 
-		let botMessage = '';
+		let botResponse, displayOptions;
 		if (
 			message.includes('hello') ||
 			message.includes('hi') ||
@@ -27,8 +27,7 @@ class SocketHelper {
 			message.includes('wassup') ||
 			message.includes('wassup')
 		) {
-			botMessage = 'Hello, how are you?';
-			// botMessage = 'Hello, how are you?';
+			botResponse = 'Hello, how are you?';
 		} else if (
 			message.includes('fine') ||
 			message.includes('good') ||
@@ -40,7 +39,9 @@ class SocketHelper {
 			message.includes('okay') ||
 			message.includes('alright')
 		) {
-			botMessage = 'Nice to hear that, How can I help you?';
+			botResponse =
+				'Nice to hear that, How can I be of assistance to you';
+			displayOptions = 'help';
 		} else if (
 			message.includes('bye') ||
 			message.includes('goodbye') ||
@@ -51,7 +52,19 @@ class SocketHelper {
 			message.includes('talk to you later') ||
 			message.includes('talk to you soon')
 		) {
-			botMessage = 'Bye, have a nice day 👋🏼';
+			botResponse = 'Bye, have a nice day 👋🏼';
+		} else if (
+			message.includes('thank you') ||
+			message.includes('appreciate')
+		) {
+			botResponse = 'You are welcome';
+		} else if (
+			message.includes('who are you') ||
+			message.includes('what is your name') ||
+			message.includes('what do you do')
+		) {
+			botResponse =
+				'My name is Chatbot, Your personal shopping assistant';
 		} else if (
 			message.includes('help') ||
 			message.includes('support') ||
@@ -62,11 +75,13 @@ class SocketHelper {
 			message.includes('support me') ||
 			message.includes('assistance me')
 		) {
-			botMessage = message;
+			botResponse = 'Below are a few options to help you get started';
+			displayOptions = 'help';
 		} else {
-			botMessage = "I don't understand";
+			botResponse = "I don't understand";
+			displayOptions = 'help';
 		}
-		return botMessage;
+		return { botResponse, displayOptions };
 	}
 }
 module.exports = SocketHelper;
