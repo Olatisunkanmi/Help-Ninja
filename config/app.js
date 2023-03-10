@@ -9,8 +9,8 @@ const appConfig = async (app) => {
 	const server = http.createServer(app);
 
 	// Set up socket
-	Socket.createSocket(server);
-
+	const { SocketInstance } = Socket.createSocket(server);
+	SocketInstance(server);
 	// Set static files
 	app.use(express.static(path.join(__dirname, '../public')));
 
