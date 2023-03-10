@@ -1,3 +1,5 @@
+const StoreService = require('../services/store');
+
 /**
  * @class socketHelper
  * @description socketHelper class
@@ -16,92 +18,126 @@ class socketHelper {
 	 */
 	static _runBot(msg) {
 		const message = msg.toLowerCase();
+		let botResponse, displayOptions, userResponse;
 
-		let botResponse, displayOptions;
-		if (
-			message.includes('hello') ||
-			message.includes('hi') ||
-			message.includes('hey') ||
-			message.includes('sup') ||
-			message.includes('yo') ||
-			message.includes('wassup') ||
-			message.includes('wassup')
-		) {
+		const greetings = ['hello', 'hi', 'hey', 'sup', 'yo', 'wassup'];
+		const affirmativeWords = [
+			'fine',
+			'good',
+			'great',
+			'awesome',
+			'cool',
+			'nice',
+			'ok',
+			'okay',
+			'alright',
+		];
+		const farewellWords = [
+			'bye',
+			'goodbye',
+			'see you',
+			'see ya',
+			'cya',
+			'ttyl',
+			'talk to you later',
+			'talk to you soon',
+		];
+		const appreciationWords = ['thank you', 'appreciate'];
+		const inquiryWords = [
+			'who are you',
+			'what is your name',
+			'what do you do',
+		];
+		const helpWords = [
+			'help',
+			'support',
+			'assistance',
+			'assist',
+			'assist me',
+			'help me',
+			'support me',
+			'assistance me',
+		];
+
+		botResponse = 'Sorry, I did not understand.';
+		// displayOptions = 'Please choose from the following options:';
+
+		if (greetings.some((word) => message.includes(word))) {
 			botResponse = 'Hello, how are you?';
 		} else if (
-			message.includes('fine') ||
-			message.includes('good') ||
-			message.includes('great') ||
-			message.includes('awesome') ||
-			message.includes('cool') ||
-			message.includes('nice') ||
-			message.includes('ok') ||
-			message.includes('okay') ||
-			message.includes('alright')
+			affirmativeWords.some((word) => message.includes(word))
 		) {
-			botResponse =
-				'Nice to hear that, How can I be of assistance to you';
+			botResponse = 'That is great to hear, How can I help you?';
 			displayOptions = 'help';
+		} else if (farewellWords.some((word) => message.includes(word))) {
+			botResponse = 'Goodbye, have a nice day.';
 		} else if (
-			message.includes('bye') ||
-			message.includes('goodbye') ||
-			message.includes('see you') ||
-			message.includes('see ya') ||
-			message.includes('cya') ||
-			message.includes('ttyl') ||
-			message.includes('talk to you later') ||
-			message.includes('talk to you soon')
+			appreciationWords.some((word) => message.includes(word))
 		) {
-			botResponse = 'Bye, have a nice day 👋🏼';
-		} else if (
-			message.includes('thank you') ||
-			message.includes('appreciate')
-		) {
-			botResponse = 'You are welcome';
-		} else if (
-			message.includes('who are you') ||
-			message.includes('what is your name') ||
-			message.includes('what do you do')
-		) {
-			botResponse =
-				'My name is Chatbot, Your personal shopping assistant';
-		} else if (
-			message.includes('help') ||
-			message.includes('support') ||
-			message.includes('assistance') ||
-			message.includes('assist') ||
-			message.includes('assist me') ||
-			message.includes('help me') ||
-			message.includes('support me') ||
-			message.includes('assistance me')
-		) {
-			botResponse = 'Below are a few options to help you get started';
-			displayOptions = 'help';
+			botResponse = 'You are welcome.';
+		} else if (inquiryWords.some((word) => message.includes(word))) {
+			botResponse = 'I am a chatbot.';
+		} else if (helpWords.some((word) => message.includes(word))) {
+			botResponse = 'How can I help you?';
+		} else if (message == '99') {
+			botResponse = 'Thank you for shopping with us.';
+		} else if (message == '98') {
+			botResponse = 'Your order history is as follows:';
+		} else if (message == '97') {
+			botResponse = 'Your current order is as follows:';
+			displayOptions = 'current';
+		} else if (message == '96') {
+			botResponse = 'Shop items are as follows:';
+			displayOptions = 'shopItems';
+		} else if (message == '0') {
+			botResponse = `Your order has been cancelled. Thank you for shopping with us. </br> Would you like to shop again?`;
+			displayOptions = 'shop';
+		} else if (message == '94') {
+			botResponse = 'Your order details are as follows:';
+			displayOptions = 'order';
 		} else {
-			botResponse = "I don't understand";
+			botResponse =
+				'Sorry, I did not understand, Help me understand by choosing from the following options:';
 			displayOptions = 'help';
 		}
+
 		return { botResponse, displayOptions };
 	}
 
 	/**
 	 * @static
-	 * @function _emitNotification - emits a notification to the chatrom
-	 * @param {object} socket
-	 * @param {function} _emitNotification - emits a notification to the chatrom
+	 * @function _displayOptions - displays options to the user
 	 * @memberof socketHelper
-	 * @description _emitNotification function
+	 * @returns {array} _displayOptions - array of options to display to the user
 	 */
 
-	static _displayOptions(sock, _emitNotification) {
-		return [
-			'1. Register',
-			'99. To checkout order',
-			'98, To view Order History',
-			'97, To view Current Order ',
-			'96, To view Order Status',
-			'95, To view Order Details',
-		];
+	static _displayOptions(displayOptions) {
+		let options = [];
+
+		if (displayOptions == 'help') {
+			options = [
+				'Press 99. To checkout order',
+				'Press 98. To view Order History',
+				'Press 97. To view Current Order ',
+				'Press 96. To view Shop Items',
+				'Press 0. To cancel order',
+			];
+		} else if (displayOptions == 'shop') {
+			options.push('Press 96. To view Shop Items');
+		}
+
+		return options;
+	}
+
+	/**
+	 * @static
+	 * @function _getStoreItems - gets the store items
+	 * @memberof socketHelper
+	 * @returns {array} items - array of store items
+	 */
+	static async _getStoreItems() {
+		return await StoreService.getStoreItems();
 	}
 }
+
 module.exports = socketHelper;
