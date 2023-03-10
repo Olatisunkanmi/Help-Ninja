@@ -1,5 +1,57 @@
 // This file is for the chat page
-//Use closure to protect variables
+//Use closure to protect variables from global scope and to create private methods and variables that can only be accessed by the public methods and variables
+// that are returned by the IIFE (Immediately Invoked Function Expression) that is used to create the module. This is called the Module Pattern.
+
+/**************USER DATA************************ */
+
+/***********************SESSION STORAGE*********************** */
+
+/**
+ * @static
+ * @private
+ * @returns {object} sessionStorage
+ * @memberof sessionStorage
+ * @description sessionStorage module
+ */
+const sessionStorage = (() => {
+	const _addUser = (user) => {
+		const userSession =
+			JSON.parse(localStorage.getItem(storageKey)) || [];
+
+		console.log(userSession);
+		userSession[user.id] = user;
+
+		localStorage.setItem(storageKey, JSON.stringify(user));
+	};
+
+	const _getUser = (id) => {
+		const userSession =
+			JSON.parse(localStorage.getItem(storageKey)) || [];
+		return userSession[id];
+	};
+
+	const _removeUser = (id) => {
+		const userSession =
+			JSON.parse(localstorage.getItem(storageKey)) || [];
+		delete userSession[id];
+		localStorage.setItem(storageKey, JSON.stringify(userSession));
+	};
+
+	const _getAllUsers = () => {
+		const allUsers =
+			JSON.parse(localStorage.getItem(storageKey)) || [];
+		return allUsers;
+	};
+
+	const _updateUser = (id, user) => {};
+
+	return {
+		_addUser,
+		_getUser,
+		_removeUser,
+		_getAllUsers,
+	};
+})();
 
 /***********************UI CONTROLLER*********************** */
 
@@ -9,7 +61,7 @@
  * @returns {object} getDomStrings
  * @membof uiController
  */
-let uiController = (() => {
+const uiController = (() => {
 	//All DOM Strings
 	let allDomStrings = {
 		/**
@@ -24,7 +76,26 @@ let uiController = (() => {
 		notification: '.notification',
 	};
 
-	//Get all inputs
+	const displayItem = () => {
+		const shopItems = [];
+	};
+
+	const appendDOM = (message, html) => {
+		//choose the element to insert the HTML into
+		element = allDomStrings.chatThread;
+
+		//replace the placeholder text with some actual data
+		newHtml = html.replace('%username%', message.username);
+		newHtml = newHtml.replace('%message%', message.text);
+		newHtml = newHtml.replace('%time%', message.time);
+
+		//insert the HTML into the DOM
+		document
+			.querySelector(element)
+			.insertAdjacentHTML('beforeend', newHtml);
+	};
+
+	//Public methods
 	return {
 		getInputs: () =>
 			/**
@@ -43,32 +114,18 @@ let uiController = (() => {
 				),
 			}),
 
+		/**
+		 * @static
+		 * @private
+		 * @returns {object } - function to append messages and notifications to the DOM
+		 * @memberof uiController
+		 */
+
 		appendMessage: () => {
-			//create HTML string with placeholder text
-			let html, newHtml, element;
-
-			function appendDOM(message, html) {
-				//choose the element to insert the HTML into
-				element = allDomStrings.chatThread;
-
-				//replace the placeholder text with some actual data
-				newHtml = html.replace('%username%', message.username);
-				newHtml = newHtml.replace('%message%', message.text);
-				newHtml = newHtml.replace('%time%', message.time);
-
-				//insert the HTML into the DOM
-				document
-					.querySelector(element)
-					.insertAdjacentHTML('beforeend', newHtml);
-			}
+			let html, element;
 
 			return {
 				appendChat: (message) => {
-					//choose the element to insert the HTML into
-					element = allDomStrings.chatThread;
-
-					//create HTML string with placeholder text
-					//if the message is from the user
 					if (message.username.includes('Bot')) {
 						html =
 							'<li> <div class="botMessages anim-typewriter"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
@@ -107,7 +164,7 @@ let uiController = (() => {
  */
 
 let socketController = (() => {
-	let socket = io();
+	const socket = io();
 
 	/**
 	 * @private
@@ -143,8 +200,12 @@ let socketController = (() => {
 	 */
 	socket.on('userMessage', (msg) => msg);
 
+	socket.on('shopItems', (msg) => msg);
+
 	return {
-		getSocket: () => socket,
+		getSocket: {
+			socket: socket,
+		},
 	};
 })();
 
@@ -157,11 +218,38 @@ let socketController = (() => {
  * @summary This is the main controller
  *	@memberof appController
  */
-let appController = ((uiController, socketController) => {
-	const socket = socketController.getSocket();
+const appController = ((
+	uiController,
+	socketController,
+	sessionStorage,
+) => {
+	//Get the socket
+	const { socket } = socketController.getSocket;
+
+	//Get the UI controllers
 	const { appendMessage, getInputs } = uiController;
 	const { appendChat, appendNotification } = appendMessage();
 	const { chatForm, chatThread } = getInputs();
+
+	//Get the session storage
+	// const { getItem, setItem } = sessionStorage;
+
+	const user = {
+		username: 'Guest',
+		email: 'user@mail.com',
+		cart: [
+			{
+				name: 'product1',
+				price: 100,
+				quantity: 1,
+			},
+			{
+				name: 'product2',
+				price: 200,
+				quantity: 1,
+			},
+		],
+	};
 
 	/**
 	 * @private
@@ -183,9 +271,16 @@ let appController = ((uiController, socketController) => {
 		});
 
 		socket.on('userMessage', (message) => {
-			appendChat(message);
+			console.log(message);
 
+			// sessionStorage._addUser(user);
+
+			appendChat(message);
 			scrollToBottom();
+		});
+
+		socket.on('shopItems', (message) => {
+			console.log(message);
 		});
 	};
 
@@ -199,6 +294,12 @@ let appController = ((uiController, socketController) => {
 		}
 	});
 
+	//save user seesion to local storage
+	const saveSession = (options) => {
+		// setItem
+		setItem('username', 'options.username');
+	};
+
 	//scroll to bottom of chat
 	const scrollToBottom = () => {
 		chatThread.scrollTop = chatThread.scrollHeight;
@@ -209,6 +310,6 @@ let appController = ((uiController, socketController) => {
 			init();
 		},
 	};
-})(uiController, socketController);
+})(uiController, socketController, sessionStorage);
 
 appController.init();
