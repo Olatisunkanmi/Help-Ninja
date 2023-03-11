@@ -74,15 +74,46 @@ const uiController = (() => {
 		message: '.message',
 		chatThread: '.chat-thread',
 		notification: '.notification',
+		itemsDiv: '.store-items',
 	};
 
-	const displayItem = () => {
-		const shopItems = [];
+	const displayItems = (items) => {
+		const container = document.querySelector(
+			allDomStrings.chatThread,
+		);
+
+		//create a list inside the container
+		const list = document.createElement('li');
+		list.classList.add('store-items');
+		container.appendChild(list);
+
+		items.forEach((item) => {
+			// Replace the placeholders in the HTML template with data from the item
+			const htmlTemplate = `<div class="container">
+			<div class="banner-wrapper">
+			  <div class="banner-image">%image%</div>
+			  <h1 class="image-text">%img-text%</h1>
+			  <p class="image-desc">%img-desc%</p>
+			</div>
+			<div class="button-wrapper">
+			  <button class="btn fill">BUY NOW</button>
+			</div>
+		  </div>`;
+
+			let newHtml = htmlTemplate.replace('%image%', item.image);
+			newHtml = newHtml.replace('%img-text%', item.title);
+			newHtml = newHtml.replace('%img-desc%', item.description);
+
+			// Insert the new HTML into the list item element
+			list.insertAdjacentHTML('beforeend', newHtml);
+
+			// Append the list item element to the container
+			container.appendChild(list);
+		});
 	};
 
-	const appendDOM = (message, html) => {
+	const appendDOM = (message, html, element) => {
 		//choose the element to insert the HTML into
-		element = allDomStrings.chatThread;
 
 		//replace the placeholder text with some actual data
 		newHtml = html.replace('%username%', message.username);
@@ -112,6 +143,7 @@ const uiController = (() => {
 				notificationThread: document.querySelector(
 					allDomStrings.notification,
 				),
+				itemsDiv: document.querySelector(allDomStrings.itemsDiv),
 			}),
 
 		/**
@@ -126,6 +158,8 @@ const uiController = (() => {
 
 			return {
 				appendChat: (message) => {
+					element = allDomStrings.chatThread;
+
 					if (message.username.includes('Bot')) {
 						html =
 							'<li> <div class="botMessages anim-typewriter"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
@@ -134,14 +168,19 @@ const uiController = (() => {
 							'<li> <div class="messages"><p class="meta">%username% <span>%time%</span></p><p class="text">%message%</p></div></li>';
 					}
 
-					appendDOM(message, html);
+					appendDOM(message, html, element);
 				},
 
 				appendNotification: (message) => {
+					element = allDomStrings.chatThread;
 					html =
 						'<li> <div class="notification"> <div class="notify">%message%</div></div> </li>';
 
-					appendDOM(message, html);
+					appendDOM(message, html, element);
+				},
+
+				appendItems: (items) => {
+					displayItems(items);
 				},
 			};
 		},
@@ -228,7 +267,8 @@ const appController = ((
 
 	//Get the UI controllers
 	const { appendMessage, getInputs } = uiController;
-	const { appendChat, appendNotification } = appendMessage();
+	const { appendChat, appendNotification, appendItems } =
+		appendMessage();
 	const { chatForm, chatThread } = getInputs();
 
 	//Get the session storage
@@ -281,6 +321,7 @@ const appController = ((
 
 		socket.on('shopItems', (message) => {
 			console.log(message);
+			appendItems(message);
 		});
 	};
 
