@@ -100,8 +100,8 @@ const uiController = (() => {
 			</div>
 		  </div>`;
 
-			let newHtml = htmlTemplate.replace('%image%', item.image);
-			newHtml = newHtml.replace('%img-text%', item.title);
+			// let newHtml = htmlTemplate.replace('%image%', 'item.image');
+			let newHtml = htmlTemplate.replace('%img-text%', item.title);
 			newHtml = newHtml.replace('%img-desc%', item.description);
 
 			// Insert the new HTML into the list item element
