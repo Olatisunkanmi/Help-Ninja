@@ -194,15 +194,6 @@ class Socket {
 					new Date(),
 			);
 
-			//restrict multiple connections from same user
-			// if (this.users[socket.id]) {
-			// 	this._emitNotification(
-			// 		socket,
-			// 		'You are already connected to Help Ninja',
-			// 	);
-			// 	return;
-			// }
-
 			// Listen for register
 			this._listenRegister(socket);
 
@@ -223,6 +214,13 @@ class Socket {
 				'Below are some of the things I can help you with',
 			);
 
+			socket.on('notification', (msg) => {
+				this._emitNotification(
+					socket,
+					`Your Order ${msg.title} has been added to Your Cart </br> Press 0 to cancel this order`,
+				);
+			});
+
 			//Emit options to user
 			this._displayOptions(socket, 'help');
 
@@ -237,29 +235,12 @@ class Socket {
 			// socket.emit('storeItems', 'storeItems');
 		});
 
-		// return this.io;
-	}
-
-	/**
-	 * @private
-	 * @function initializaStoreSocket
-	 * @memberof Socket
-	 * @description Initializes store socket for store items
-	 * @listens for connection to store namespace and emits storeItems
-	 * @emits storeItems
-	 * @returns {function} _sendStoreItems - returns store items to the chatroom
-	 */
-
-	initializaStoreSocket() {
-		const storeNsp = this.io.of('/store');
-		storeNsp.on('connection', (socket) => {
-			logger.warn(
-				'New WS Connection to the store...' +
-					socket.id +
-					' connected ' +
-					new Date(),
-			);
-			storeNsp.emit('storeItems', this._sendStoreItems());
+		this.io.of('/chectout').on('connection', (socket) => {
+			console.log('checkout connected');
+			socket.on('checkout', (msg) => {
+				console.log('checkout', msg);
+				this.io.of('/chectout').emit('checkout', msg);
+			});
 		});
 	}
 
@@ -277,14 +258,8 @@ class Socket {
 			return socketInstance.initializeSocket();
 		};
 
-		const _createRegisterSocketInstance = (server) => {
-			const socketInstance = new Socket(server);
-			return socketInstance.initializaStoreSocket();
-		};
-
 		return {
 			SocketInstance: _createSocketInstance,
-			registerSocket: _createRegisterSocketInstance,
 		};
 	}
 }
