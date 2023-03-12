@@ -14,6 +14,9 @@
  * @description sessionStorage module
  */
 const sessionStorage = (() => {
+	const storageKey = 'userSession';
+	const cartKey = 'cartItems';
+
 	const _addUser = (user) => {
 		const userSession =
 			JSON.parse(localStorage.getItem(storageKey)) || [];
@@ -24,12 +27,6 @@ const sessionStorage = (() => {
 		localStorage.setItem(storageKey, JSON.stringify(user));
 	};
 
-	const _getUser = (id) => {
-		const userSession =
-			JSON.parse(localStorage.getItem(storageKey)) || [];
-		return userSession[id];
-	};
-
 	const _removeUser = (id) => {
 		const userSession =
 			JSON.parse(localstorage.getItem(storageKey)) || [];
@@ -37,19 +34,22 @@ const sessionStorage = (() => {
 		localStorage.setItem(storageKey, JSON.stringify(userSession));
 	};
 
-	const _getAllUsers = () => {
-		const allUsers =
-			JSON.parse(localStorage.getItem(storageKey)) || [];
-		return allUsers;
+	const _updateCart = (item) => {
+		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		userCart.push(item);
+		localStorage.setItem(cartKey, JSON.stringify(userCart));
 	};
 
-	const _updateUser = (id, user) => {};
+	const _fetchCart = () => {
+		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		return userCart;
+	};
 
 	return {
 		_addUser,
-		_getUser,
 		_removeUser,
-		_getAllUsers,
+		_updateCart,
+		_fetchCart,
 	};
 })();
 
@@ -78,41 +78,30 @@ const uiController = (() => {
 		buyBtn: '.buy-item',
 	};
 
-	function btnClick(buttons, onClick, items, getUserSelectedItems) {
-		buttons.forEach((button, index) => {
-			button.addEventListener('click', () => {
-				const click = onClick(items[index]);
-				console.log(click);
-				const userSelectedItems = getUserSelectedItems();
-				userSelectedItems.getSelect(click);
-			});
-		});
-	}
-
 	const getUserSelectedItems = (item) => {
-		const userItems = [];
+		//Save user selected items to local storage
+		const storageKey = 'cartItems';
 
-		const userLog = () => {
-			console.log(item);
-		};
-
-		//function to get the selected items
 		const setSelect = (item) => {
-			userItems.push(item);
-			return userLog();
+			appController.updateCart(item);
 		};
 
 		return {
 			getSelect: (item) => {
 				setSelect(item);
 			},
-			getItems: userLog,
 		};
-		// const user = sessionStorage._getUser(1);
-		// const userItems = user.items;
-		// userItems.push(item);
-		// sessionStorage._addUser(user);
 	};
+
+	function btnClick(buttons, onClick, items, getUserSelectedItems) {
+		buttons.forEach((button, index) => {
+			button.addEventListener('click', () => {
+				const click = onClick(items[index]);
+				const userSelectedItems = getUserSelectedItems();
+				userSelectedItems.getSelect(click);
+			});
+		});
+	}
 
 	const displayItems = (items, onClick) => {
 		const container = document.querySelector(
@@ -255,6 +244,7 @@ const uiController = (() => {
 
 let socketController = (() => {
 	const socket = io();
+	const cart = io('/cart');
 
 	/**
 	 * @private
@@ -377,11 +367,16 @@ const appController = ((
 			appendItems(message, userItems);
 			scrollToBottom();
 		});
-
-		socket.emit('updateCart', user);
 	};
 
-	//Get user selected items
+	//Get user selected items and notify the server
+	const updateCart = (item) => {
+		sessionStorage._updateCart(item);
+
+		socket.emit('notification', item);
+
+		scrollToBottom();
+	};
 
 	//Listen to user chat input
 	chatForm.addEventListener('keypress', (e) => {
@@ -408,18 +403,22 @@ const appController = ((
 		init: () => {
 			init();
 		},
+
+		updateCart: (item) => {
+			updateCart(item);
+		},
 	};
 })(uiController, socketController, sessionStorage);
 
 appController.init();
 
-function btnClick(buttons, onClick, items, getUserSelectedItems) {
-	buttons.forEach((button, index) => {
-		button.addEventListener('click', () => {
-			const click = onClick(items[index]);
-			console.log(click);
-			const userSelectedItems = getUserSelectedItems();
-			userSelectedItems.getSelect(click);
-		});
-	});
-}
+// function btnClick(buttons, onClick, items, getUserSelectedItems) {
+// 	buttons.forEach((button, index) => {
+// 		button.addEventListener('click', () => {
+// 			const click = onClick(items[index]);
+// 			console.log(click);
+// 			const userSelectedItems = getUserSelectedItems();
+// 			userSelectedItems.getSelect(click);
+// 		});
+// 	});
+// }
