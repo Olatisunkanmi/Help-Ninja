@@ -75,9 +75,46 @@ const uiController = (() => {
 		chatThread: '.chat-thread',
 		notification: '.notification',
 		itemsDiv: '.store-items',
+		buyBtn: '.buy-item',
 	};
 
-	const displayItems = (items) => {
+	function btnClick(buttons, onClick, items, getUserSelectedItems) {
+		buttons.forEach((button, index) => {
+			button.addEventListener('click', () => {
+				const click = onClick(items[index]);
+				console.log(click);
+				const userSelectedItems = getUserSelectedItems();
+				userSelectedItems.getSelect(click);
+			});
+		});
+	}
+
+	const getUserSelectedItems = (item) => {
+		const userItems = [];
+
+		const userLog = () => {
+			console.log(item);
+		};
+
+		//function to get the selected items
+		const setSelect = (item) => {
+			userItems.push(item);
+			return userLog();
+		};
+
+		return {
+			getSelect: (item) => {
+				setSelect(item);
+			},
+			getItems: userLog,
+		};
+		// const user = sessionStorage._getUser(1);
+		// const userItems = user.items;
+		// userItems.push(item);
+		// sessionStorage._addUser(user);
+	};
+
+	const displayItems = (items, onClick) => {
 		const container = document.querySelector(
 			allDomStrings.chatThread,
 		);
@@ -96,12 +133,18 @@ const uiController = (() => {
 			  <p class="image-desc">%img-desc%</p>
 			</div>
 			<div class="button-wrapper">
-			  <button class="btn fill">BUY NOW</button>
+			  <button class="btn fill buy-item">Add to Cart</button>
 			</div>
 		  </div>`;
 
-			// let newHtml = htmlTemplate.replace('%image%', 'item.image');
-			let newHtml = htmlTemplate.replace('%img-text%', item.title);
+			const imgElement = document.createElement('img');
+			imgElement.src = item.image;
+
+			let newHtml = htmlTemplate.replace(
+				'%image%',
+				imgElement.outerHTML,
+			);
+			newHtml = newHtml.replace('%img-text%', item.title);
 			newHtml = newHtml.replace('%img-desc%', item.description);
 
 			// Insert the new HTML into the list item element
@@ -110,6 +153,10 @@ const uiController = (() => {
 			// Append the list item element to the container
 			container.appendChild(list);
 		});
+
+		// Add event listeners to the buttons
+		const buttons = document.querySelectorAll(allDomStrings.buyBtn);
+		btnClick(buttons, onClick, items, getUserSelectedItems);
 	};
 
 	const appendDOM = (message, html, element) => {
@@ -125,6 +172,8 @@ const uiController = (() => {
 			.querySelector(element)
 			.insertAdjacentHTML('beforeend', newHtml);
 	};
+
+	//display the items
 
 	//Public methods
 	return {
@@ -144,6 +193,7 @@ const uiController = (() => {
 					allDomStrings.notification,
 				),
 				itemsDiv: document.querySelector(allDomStrings.itemsDiv),
+				buyBtn: document.querySelector(allDomStrings.buyBtn),
 			}),
 
 		/**
@@ -152,7 +202,6 @@ const uiController = (() => {
 		 * @returns {object } - function to append messages and notifications to the DOM
 		 * @memberof uiController
 		 */
-
 		appendMessage: () => {
 			let html, element;
 
@@ -180,7 +229,7 @@ const uiController = (() => {
 				},
 
 				appendItems: (items) => {
-					displayItems(items);
+					displayItems(items, (item) => item);
 				},
 			};
 		},
@@ -190,6 +239,8 @@ const uiController = (() => {
 		 * @returns {object} allDomStrings
 		 */
 		getDomStrings: () => allDomStrings,
+
+		getUserSelectedItems: () => getUserSelectedItems(),
 	};
 })();
 
@@ -266,10 +317,12 @@ const appController = ((
 	const { socket } = socketController.getSocket;
 
 	//Get the UI controllers
-	const { appendMessage, getInputs } = uiController;
+	const { appendMessage, getInputs, getUserSelectedItems } =
+		uiController;
 	const { appendChat, appendNotification, appendItems } =
 		appendMessage();
-	const { chatForm, chatThread } = getInputs();
+	const { chatForm, chatThread, buyBtn } = getInputs();
+	const selectedItems = uiController.getUserSelectedItems();
 
 	//Get the session storage
 	// const { getItem, setItem } = sessionStorage;
@@ -320,10 +373,15 @@ const appController = ((
 		});
 
 		socket.on('shopItems', (message) => {
-			console.log(message);
-			appendItems(message);
+			const userItems = [];
+			appendItems(message, userItems);
+			scrollToBottom();
 		});
+
+		socket.emit('updateCart', user);
 	};
+
+	//Get user selected items
 
 	//Listen to user chat input
 	chatForm.addEventListener('keypress', (e) => {
@@ -354,3 +412,14 @@ const appController = ((
 })(uiController, socketController, sessionStorage);
 
 appController.init();
+
+function btnClick(buttons, onClick, items, getUserSelectedItems) {
+	buttons.forEach((button, index) => {
+		button.addEventListener('click', () => {
+			const click = onClick(items[index]);
+			console.log(click);
+			const userSelectedItems = getUserSelectedItems();
+			userSelectedItems.getSelect(click);
+		});
+	});
+}
