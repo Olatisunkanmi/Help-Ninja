@@ -15,7 +15,8 @@ module.exports = {
 	MODULE_ERROR: 'ERROR IN MODULE',
 	INTERNAL_SERVER_ERROR: 'INTERNAL SERVER ERROR',
 	API_NOT_FOUND: 'METHOD OR ROUTE DOES NOT EXIST',
-	CHECKOUT: 'Would you like to checkout?  Press 99 to checkout',
+	CHECKOUT:
+		'Would you like to checkout?  Press 99 to checkout. </br > </br > Press 90 to clear your cart',
 	HELP: 'Help me understand by choosing from the following options:',
 
 	NEW_CONNECTION: (id) =>
@@ -26,9 +27,9 @@ module.exports = {
 	SHOPPING_INTRO_2: 'Please select an item to add to your cart',
 	SHOPPING_ERROR: `There was an error adding your order to your cart, kindly refresh the page and try again`,
 	SHOPPING_SUCCESS: (item) =>
-		`Your Order ${item} has been added to Your Cart </br> Press 1 to view your cart </br> Press 2 to continue shopping`,
+		`Your Order ${item} has been added to Your Cart </br> Press 97 to view your cart `,
 	DUPLICATE_ORDER: (item) =>
-		`${item} already exists in your cart.  </br> Press 1 to view your Cart`,
+		`${item} already exists in your cart.  </br> Press 97 to view your Cart`,
 
 	//BOT RESPONSES
 
@@ -104,12 +105,15 @@ module.exports = {
 	CANCEL_ORDER_RESPONSE:
 		'Your order has been cancelled. Thank you for shopping with us. </br> Would you like to shop again?',
 
+	GO_TO_CART_PAGE:
+		"Click on the 'Cart' button 👇🏼 to view your cart and adjust your order",
 	//DISPLAY ITEMS
 	USER_SHOPPING_OPTIONS: [
 		'Press 99. To checkout order',
 		'Press 98. To view Order History',
 		'Press 97. To view Current Order ',
 		'Press 96. To view Shop Items',
+		'Press 90. To clear your cart',
 		'Press 0. To cancel order',
 	],
 };
