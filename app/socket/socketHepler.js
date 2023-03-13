@@ -1,5 +1,32 @@
 const StoreService = require('../services/store');
+const constants = require('../utils/constants');
 
+const {
+	APPRECIATION_WORDS,
+	GREETINGS,
+	AFFIRMATIVE_WORDS,
+	FAREWELL_WORDS,
+	INQUIRY_WORDS,
+	HELP_WORDS,
+	GREETINGS_RESPONSE,
+	HELP_WORDS_RESPONSE,
+	INQUIRY_WORDS_RESPONSE,
+	APPRECIATION_WORDS_RESPONSE,
+	FAREWELL_WORDS_RESPONSE,
+	AFFIRMATIVE_WORDS_RESPONSE,
+	CHECKOUT_ORDER,
+	CHECKOUT_ORDER_RESPONSE,
+	ORDER_HISTORY_RESPONSE,
+	CURRENT_ORDER_RESPONSE,
+	VIEW_SHOP_ITEMS_RESPONSE,
+	CANCEL_ORDER_RESPONSE,
+	ORDER_HISTORY,
+	CURRENT_ORDER,
+	VIEW_SHOP_ITEMS,
+	CANCEL_ORDER,
+	ERROR_RESPONSE,
+	USER_SHOPPING_OPTIONS,
+} = constants;
 /**
  * @class socketHelper
  * @description socketHelper class
@@ -20,84 +47,41 @@ class socketHelper {
 		const message = msg.toLowerCase();
 		let botResponse, displayOptions, userResponse;
 
-		const greetings = ['hello', 'hi', 'hey', 'sup', 'yo', 'wassup'];
-		const affirmativeWords = [
-			'fine',
-			'good',
-			'great',
-			'awesome',
-			'cool',
-			'nice',
-			'ok',
-			'okay',
-			'alright',
-		];
-		const farewellWords = [
-			'bye',
-			'goodbye',
-			'see you',
-			'see ya',
-			'cya',
-			'ttyl',
-			'talk to you later',
-			'talk to you soon',
-		];
-		const appreciationWords = ['thank you', 'appreciate'];
-		const inquiryWords = [
-			'who are you',
-			'what is your name',
-			'what do you do',
-		];
-		const helpWords = [
-			'help',
-			'support',
-			'assistance',
-			'assist',
-			'assist me',
-			'help me',
-			'support me',
-			'assistance me',
-		];
-
-		botResponse = 'Sorry, I did not understand.';
-		// displayOptions = 'Please choose from the following options:';
-
-		if (greetings.some((word) => message.includes(word))) {
-			botResponse = 'Hello, how are you?';
+		if (GREETINGS.some((word) => message.includes(word))) {
+			botResponse = GREETINGS_RESPONSE;
 		} else if (
-			affirmativeWords.some((word) => message.includes(word))
+			AFFIRMATIVE_WORDS.some((word) => message.includes(word))
 		) {
-			botResponse = 'That is great to hear, How can I help you?';
+			botResponse = AFFIRMATIVE_WORDS_RESPONSE;
 			displayOptions = 'help';
-		} else if (farewellWords.some((word) => message.includes(word))) {
-			botResponse = 'Goodbye, have a nice day.';
 		} else if (
-			appreciationWords.some((word) => message.includes(word))
+			FAREWELL_WORDS.some((word) => message.includes(word))
 		) {
-			botResponse = 'You are welcome.';
-		} else if (inquiryWords.some((word) => message.includes(word))) {
-			botResponse = 'I am a chatbot.';
-		} else if (helpWords.some((word) => message.includes(word))) {
-			botResponse = 'How can I help you?';
-		} else if (message == '99') {
-			botResponse = 'Thank you for shopping with us.';
-		} else if (message == '98') {
-			botResponse = 'Your order history is as follows:';
-		} else if (message == '97') {
-			botResponse = 'Your current order is as follows:';
-			displayOptions = 'current';
-		} else if (message == '96') {
-			botResponse = 'Shop items are as follows:';
+			botResponse = FAREWELL_WORDS_RESPONSE;
+		} else if (
+			APPRECIATION_WORDS.some((word) => message.includes(word))
+		) {
+			botResponse = APPRECIATION_WORDS_RESPONSE;
+		} else if (INQUIRY_WORDS.some((word) => message.includes(word))) {
+			botResponse = INQUIRY_WORDS_RESPONSE;
+		} else if (HELP_WORDS.some((word) => message.includes(word))) {
+			botResponse = HELP_WORDS_RESPONSE;
+			displayOptions = 'help';
+		} else if (message == CHECKOUT_ORDER) {
+			botResponse = CHECKOUT_ORDER_RESPONSE;
+		} else if (message == ORDER_HISTORY) {
+			botResponse = ORDER_HISTORY_RESPONSE;
+		} else if (message == CURRENT_ORDER) {
+			botResponse = CURRENT_ORDER_RESPONSE;
+			displayOptions = 'cart';
+		} else if (message == VIEW_SHOP_ITEMS) {
+			botResponse = VIEW_SHOP_ITEMS_RESPONSE;
 			displayOptions = 'shopItems';
-		} else if (message == '0') {
-			botResponse = `Your order has been cancelled. Thank you for shopping with us. </br> Would you like to shop again?`;
+		} else if (message == CANCEL_ORDER) {
+			botResponse = CANCEL_ORDER_RESPONSE;
 			displayOptions = 'shop';
-		} else if (message == '94') {
-			botResponse = 'Your order details are as follows:';
-			displayOptions = 'order';
 		} else {
-			botResponse =
-				'Sorry, I did not understand, Help me understand by choosing from the following options:';
+			botResponse = ERROR_RESPONSE;
 			displayOptions = 'help';
 		}
 
@@ -115,13 +99,7 @@ class socketHelper {
 		let options = [];
 
 		if (displayOptions == 'help') {
-			options = [
-				'Press 99. To checkout order',
-				'Press 98. To view Order History',
-				'Press 97. To view Current Order ',
-				'Press 96. To view Shop Items',
-				'Press 0. To cancel order',
-			];
+			options = USER_SHOPPING_OPTIONS;
 		} else if (displayOptions == 'shop') {
 			options.push('Press 96. To view Shop Items');
 		}
