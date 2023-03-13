@@ -137,4 +137,6 @@ const AppController = ((socketController, UIController) => {
 	};
 })(socketController, UIController);
 
+// window.addEventListener('load', AppController.init());
+
 AppController.init();
