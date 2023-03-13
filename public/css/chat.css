@@ -181,11 +181,23 @@ body {
 	align-items: center;
 }
 
-.chat-window h6 a {
-	color: #0ad5c1;
+.go_to_cart a {
+	color: whitesmoke;
 	text-decoration: none;
+
 	font: 16px/24px 'Noto Sans', sans-serif;
 	margin: 0;
+}
+
+.go_to_cart {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 80px;
+	padding: 5px;
+	background-color: #0ec879;
+	color: whitesmoke;
+	border-radius: 10px;
 }
 
 .chat-window-message {
