@@ -1,6 +1,5 @@
 const root = require('app-root-path');
 const winston = require('winston');
-const config = require('./env');
 
 const { createLogger, format, transports } = winston;
 const { combine, timestamp, label, printf, json, colorize } = format;
@@ -66,7 +65,6 @@ class Logger {
 				format: json(),
 			},
 		};
-		this.environment = config.NODE_ENV || 'development';
 	}
 
 	/**
