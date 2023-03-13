@@ -16,7 +16,7 @@ const appConfig = async (app) => {
 	const PORT = 9000;
 	// Listen to port
 	server.listen(PORT, () => {
-		console.log(`Server running on port ${PORT}`);
+		logger.info(`Server running on port ${PORT}`);
 	});
 };
 
