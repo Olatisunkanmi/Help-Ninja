@@ -14,6 +14,7 @@ const {
 	SHOPPING_ERROR,
 	SHOPPING_SUCCESS,
 	DUPLICATE_ORDER,
+	GO_TO_CART_PAGE,
 	REVIEW,
 } = constants;
 
@@ -108,7 +109,7 @@ class Socket {
 	 * @private
 	 * @function _displayOptions
 	 * @param {object} socket
-	 * @param {object} displayOptions - Notification to chatroom
+	 * @param {object} displayOptions - display shopping options for the user
 	 * @memberof Socket
 	 * @returns {function} _emitNotification - returns bot message to the chatroom
 	 */
@@ -156,6 +157,8 @@ class Socket {
 		this._emitBotMessage(socket, `Total: $ ${this._getTotal(data)}`);
 
 		this._emitBotMessage(socket, CHECKOUT);
+
+		this._emitBotMessage(socket, GO_TO_CART_PAGE);
 	}
 
 	/**
