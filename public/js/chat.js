@@ -34,10 +34,20 @@ const sessionStorage = (() => {
 		localStorage.setItem(storageKey, JSON.stringify(userSession));
 	};
 
+	const _findItem = (item) => {
+		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		const foundItem = userCart.find((cartItem) => {
+			return cartItem.id === item.id;
+		});
+		return foundItem;
+	};
+
 	const _updateCart = (item) => {
 		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
 		userCart.push(item);
 		localStorage.setItem(cartKey, JSON.stringify(userCart));
+
+		return item;
 	};
 
 	const _fetchCart = () => {
@@ -50,6 +60,7 @@ const sessionStorage = (() => {
 		_removeUser,
 		_updateCart,
 		_fetchCart,
+		_findItem,
 	};
 })();
 
@@ -104,6 +115,8 @@ const uiController = (() => {
 	}
 
 	const displayItems = (items, onClick) => {
+		const userSelectedItems = getUserSelectedItems();
+
 		const container = document.querySelector(
 			allDomStrings.chatThread,
 		);
@@ -145,7 +158,14 @@ const uiController = (() => {
 
 		// Add event listeners to the buttons
 		const buttons = document.querySelectorAll(allDomStrings.buyBtn);
-		btnClick(buttons, onClick, items, getUserSelectedItems);
+		// btnClick(buttons, onClick, items, getUserSelectedItems);
+
+		buttons.forEach((button, index) => {
+			button.addEventListener('click', (e) => {
+				const click = onClick(items[index]);
+				userSelectedItems.getSelect(click);
+			});
+		});
 	};
 
 	const appendDOM = (message, html, element) => {
@@ -367,15 +387,38 @@ const appController = ((
 			appendItems(message, userItems);
 			scrollToBottom();
 		});
+
+		socket.on('fetchCart', () => {
+			const cart = sessionStorage._fetchCart();
+			socket.emit('cart', cart);
+		});
+	};
+
+	const fetchCart = () => {
+		return sessionStorage._fetchCart();
+	};
+
+	const findItemandAdd = (userItem) => {
+		return sessionStorage._findItem(userItem)
+			? null
+			: sessionStorage._updateCart(userItem);
 	};
 
 	//Get user selected items and notify the server
 	const updateCart = (item) => {
-		sessionStorage._updateCart(item);
+		if (!item) {
+			socket.emit('notification', item);
+		}
 
-		socket.emit('notification', item);
-
-		scrollToBottom();
+		if (item) {
+			const ifItemExist = findItemandAdd(item);
+			console.log(ifItemExist);
+			if (!ifItemExist) {
+				socket.emit('botMessage', item);
+			} else {
+				socket.emit('notification', item);
+			}
+		}
 	};
 
 	//Listen to user chat input
@@ -387,12 +430,6 @@ const appController = ((
 			e.target.value = '';
 		}
 	});
-
-	//save user seesion to local storage
-	const saveSession = (options) => {
-		// setItem
-		setItem('username', 'options.username');
-	};
 
 	//scroll to bottom of chat
 	const scrollToBottom = () => {
@@ -411,14 +448,3 @@ const appController = ((
 })(uiController, socketController, sessionStorage);
 
 appController.init();
-
-// function btnClick(buttons, onClick, items, getUserSelectedItems) {
-// 	buttons.forEach((button, index) => {
-// 		button.addEventListener('click', () => {
-// 			const click = onClick(items[index]);
-// 			console.log(click);
-// 			const userSelectedItems = getUserSelectedItems();
-// 			userSelectedItems.getSelect(click);
-// 		});
-// 	});
-// }
