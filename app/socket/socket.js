@@ -2,12 +2,26 @@ const socket = require('socket.io');
 const Helper = require('../../config/helper');
 const socketHelper = require('./socketHepler');
 const { _runBot, _displayOptions } = require('./socketHepler');
+const constants = require('../utils/constants');
+const { CHECKOUT } = require('../utils/constants');
+
+const {
+	CHAT_BEGINNING,
+	NEW_CONNECTION,
+	BOT_NAME,
+	BOT_INTRO,
+	BOT_INTRO_2,
+	SHOPPING_ERROR,
+	SHOPPING_SUCCESS,
+	DUPLICATE_ORDER,
+	REVIEW,
+} = constants;
 
 class Socket {
 	constructor(server) {
 		this.server = server;
 		this.io = socket(server, { cors: { origin: '*' } });
-		this.botName = 'Help Ninja Bot';
+		this.botName = BOT_NAME;
 		this.userName = 'Olasunkanmi';
 	}
 
@@ -66,6 +80,10 @@ class Socket {
 		if (displayOptions === 'shopItems') {
 			this._emitShopItems(socket);
 		}
+
+		if (displayOptions === 'cart') {
+			this._emitUserItems(socket);
+		}
 	};
 
 	/**
@@ -86,18 +104,6 @@ class Socket {
 		});
 	}
 
-	//create a function to emit to a specific user
-	// _emitToUser(event, data, userId) {
-	// 	console.log(event, data, userId);
-	// 	this.io.to(userId).emit(event, data);
-	// }
-
-	_listenbotMessage(socket) {
-		socket.on('botMessage', (msg) => {
-			console.log('Bot message', msg);
-		});
-	}
-
 	/**
 	 * @private
 	 * @function _displayOptions
@@ -112,6 +118,61 @@ class Socket {
 
 		options.forEach((option) => {
 			this._emitNotification(socket, option);
+		});
+	}
+
+	/**
+	 * @private
+	 * @function _getTotal - calculates the total price of items in the cart
+	 * @param {object} data - cart items
+	 * @memberof Socket
+	 * @returns {number} total - returns the total price of items in the cart
+	 */
+
+	_getTotal(data) {
+		let total = 0;
+
+		data.forEach((item) => {
+			total += item.price;
+		});
+
+		return total;
+	}
+
+	/**
+	 * @private
+	 * @function _displayCart - displays the items in the cart
+	 * @param {object} socket
+	 * @param {object} data - cart items
+	 * @memberof Socket
+	 * @returns {function} _emitBotMessage - returns the items in the cart to the chatroom
+	 */
+
+	_displayCart(socket, data) {
+		data.forEach((data) => {
+			this._emitBotMessage(socket, `${data.title} - $ ${data.price}`);
+		});
+
+		this._emitBotMessage(socket, `Total: $ ${this._getTotal(data)}`);
+
+		this._emitBotMessage(socket, CHECKOUT);
+	}
+
+	/**
+	 * @private
+	 * @function _emitUserItems - displays user items in the cart
+	 * @param {object} socket
+	 * @emits fetchCart - Lets the server know that the user wants to view items in the cart
+	 * @listens for cart - receives the items in the cart from local storage
+	 * @memberof Socket
+	 * @returns {function} _displayCart - returns the items in the cart to the chatroom
+	 */
+
+	_emitUserItems(socket) {
+		socket.emit('fetchCart');
+
+		socket.on('cart', (data) => {
+			this._displayCart(socket, data);
 		});
 	}
 
@@ -187,38 +248,29 @@ class Socket {
 	 */
 	initializeSocket() {
 		this.io.on('connection', (socket) => {
-			logger.info(
-				'New WS Connection...' +
-					socket.id +
-					' connected at ' +
-					new Date(),
-			);
+			logger.info(NEW_CONNECTION(socket.id));
 
 			// Listen for register
 			this._listenRegister(socket);
 
 			// Emit to the new user only
-			this._emitNotification(
-				socket,
-				'Hello, you are connected to Help Ninja',
-			);
+			this._emitNotification(socket, CHAT_BEGINNING);
 
 			// Emit bot message
-			this._emitBotMessage(
-				socket,
-				'Hello there ! I am Help Ninja, your personal shopping assistant',
-			);
+			this._emitBotMessage(socket, BOT_INTRO);
 
-			this._emitBotMessage(
-				socket,
-				'Below are some of the things I can help you with',
-			);
+			this._emitBotMessage(socket, BOT_INTRO_2);
 
 			socket.on('notification', (msg) => {
-				this._emitNotification(
-					socket,
-					`Your Order ${msg.title} has been added to Your Cart </br> Press 0 to cancel this order`,
-				);
+				if (!msg) {
+					this._emitBotMessage(socket, SHOPPING_ERROR);
+				} else {
+					this._emitNotification(socket, SHOPPING_SUCCESS(msg.title));
+				}
+			});
+
+			socket.on('botMessage', (msg) => {
+				this._emitBotMessage(socket, DUPLICATE_ORDER(msg.title));
 			});
 
 			//Emit options to user
@@ -226,13 +278,6 @@ class Socket {
 
 			// Listen to chat message from user
 			this._listenToChatMessage(socket);
-
-			//display shopt items to users
-
-			//Listen for disconnect from user
-			// this._emitDisconnect(socket);
-
-			// socket.emit('storeItems', 'storeItems');
 		});
 
 		this.io.of('/chectout').on('connection', (socket) => {
