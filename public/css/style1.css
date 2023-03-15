@@ -171,9 +171,11 @@ button {
 	position: relative;
 	overflow: hidden;
 }
-button span {
+button a {
 	position: relative;
-	z-index: 2;
+	font-size: 16px;
+	font-weight: 700;
+	color: #000000;
 }
 button:before,
 button:after {
@@ -214,11 +216,6 @@ button:hover:after {
 	.inner {
 		width: 100%;
 		left: 0;
-	}
-
-	.image-1,
-	.image-2 {
-		display: none;
 	}
 
 	form {
