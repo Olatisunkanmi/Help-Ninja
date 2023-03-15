@@ -69,6 +69,7 @@ class socketHelper {
 			displayOptions = 'help';
 		} else if (message == CHECKOUT_ORDER) {
 			botResponse = CHECKOUT_ORDER_RESPONSE;
+			displayOptions = 'checkout';
 		} else if (message == ORDER_HISTORY) {
 			botResponse = ORDER_HISTORY_RESPONSE;
 		} else if (message == CURRENT_ORDER) {
