@@ -16,26 +16,26 @@
 const sessionStorage = (() => {
 	const storageKey = 'userSession';
 	const cartKey = 'cartItems';
+	const orderHistoryKey = 'orderHistory';
 
-	const _addUser = (user) => {
-		const userSession =
-			JSON.parse(localStorage.getItem(storageKey)) || [];
-
-		console.log(userSession);
-		userSession[user.id] = user;
-
-		localStorage.setItem(storageKey, JSON.stringify(user));
+	const setSession = (sessionKey, session) => {
+		return localStorage.setItem(cartKey, JSON.stringify(userCart));
 	};
 
-	const _removeUser = (id) => {
-		const userSession =
-			JSON.parse(localstorage.getItem(storageKey)) || [];
-		delete userSession[id];
-		localStorage.setItem(storageKey, JSON.stringify(userSession));
+	const getSession = (sessionKey) => {
+		return JSON.parse(localStorage.getItem(sessionKey)) || [];
+	};
+
+	const _fetchOrderHistory = () => {
+		const orderHistory = getSession(orderHistoryKey);
+	};
+
+	const _createOrderHistory = (item) => {
+		const orderHistory = setSession(orderHistoryKey, item);
 	};
 
 	const _findItem = (item) => {
-		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		const userCart = getSession(cartKey);
 		const foundItem = userCart.find((cartItem) => {
 			return cartItem.id === item.id;
 		});
@@ -43,24 +43,24 @@ const sessionStorage = (() => {
 	};
 
 	const _updateCart = (item) => {
-		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		const userCart = getSession(cartKey);
 		userCart.push(item);
-		localStorage.setItem(cartKey, JSON.stringify(userCart));
+		setSession(cartKey, userCart);
 
 		return item;
 	};
 
 	const _fetchCart = () => {
-		const userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+		const userCart = getSession(cartKey);
 		return userCart;
 	};
 
 	return {
-		_addUser,
-		_removeUser,
 		_updateCart,
 		_fetchCart,
 		_findItem,
+		_fetchOrderHistory,
+		_createOrderHistory,
 	};
 })();
 
@@ -363,21 +363,15 @@ const appController = ((
 	const init = () => {
 		socket.on('botMessage', (message) => {
 			appendChat(message);
-
 			scrollToBottom();
 		});
 
 		socket.on('notification', (message) => {
 			appendNotification(message);
-
 			scrollToBottom();
 		});
 
 		socket.on('userMessage', (message) => {
-			console.log(message);
-
-			// sessionStorage._addUser(user);
-
 			appendChat(message);
 			scrollToBottom();
 		});
@@ -424,7 +418,6 @@ const appController = ((
 	//Listen to user chat input
 	chatForm.addEventListener('keypress', (e) => {
 		if (e.keyCode === 13) {
-			//Enter key
 			e.preventDefault();
 			socket.emit('chatMessage', e.target.value);
 			e.target.value = '';
