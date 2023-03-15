@@ -32,7 +32,6 @@ const UIController = (() => {
 
 	const DOMStrings = {
 		cartItems: '.cart-Items',
-		// cartItems: '.cart-Items__list',
 		cartTotal: '.cart-Items__total',
 		cartTotalPrice: '.cart-Items__total-price',
 		cartTotalItems: '.cart-Items__total-items',
@@ -54,7 +53,7 @@ const UIController = (() => {
             %image%
             </div>
             <div class="col-md-3 col-lg-3 col-xl-3">
-                <h6 class="text-muted">%categories%</h6>
+                <h6 class="text-muted">%category%</h6>
                 <h6 class="text-black mb-0">
                   %title%
                 </h6>
@@ -102,6 +101,7 @@ const UIController = (() => {
 			);
 			newHtml = newHtml.replace('%title%', item.title);
 			newHtml = newHtml.replace('%description%', item.description);
+			newHtml = newHtml.replace('%category%', item.category);
 
 			//insert html into the DOM
 			cartItemsList.insertAdjacentHTML('beforeend', newHtml);
@@ -123,7 +123,6 @@ const AppController = ((socketController, UIController) => {
 	const socket = socketController.getSocket();
 	const { _fetchCart } = sessionController;
 	const { appendCartItems, getInputs } = UIController;
-	const { cartThread } = getInputs();
 
 	const getCartItems = () => {
 		const cartItems = _fetchCart();
