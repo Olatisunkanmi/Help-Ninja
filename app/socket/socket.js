@@ -3,11 +3,11 @@ const Helper = require('../../config/helper');
 const socketHelper = require('./socketHepler');
 const { _runBot, _displayOptions } = require('./socketHepler');
 const constants = require('../utils/constants');
-const { CHECKOUT } = require('../utils/constants');
 
 const {
 	CHAT_BEGINNING,
 	NEW_CONNECTION,
+	CHECKOUT,
 	BOT_NAME,
 	BOT_INTRO,
 	BOT_INTRO_2,
@@ -85,6 +85,10 @@ class Socket {
 		if (displayOptions === 'cart') {
 			this._emitUserItems(socket);
 		}
+
+		if (displayOptions === 'checkout') {
+			this._clearUserCart(socket);
+		}
 	};
 
 	/**
@@ -132,11 +136,9 @@ class Socket {
 
 	_getTotal(data) {
 		let total = 0;
-
 		data.forEach((item) => {
 			total += item.price;
 		});
-
 		return total;
 	}
 
@@ -153,11 +155,8 @@ class Socket {
 		data.forEach((data) => {
 			this._emitBotMessage(socket, `${data.title} - $ ${data.price}`);
 		});
-
 		this._emitBotMessage(socket, `Total: $ ${this._getTotal(data)}`);
-
 		this._emitBotMessage(socket, CHECKOUT);
-
 		this._emitBotMessage(socket, GO_TO_CART_PAGE);
 	}
 
@@ -229,7 +228,6 @@ class Socket {
 
 	_emitShopItems = async () => {
 		const storeItems = await socketHelper._getStoreItems();
-
 		this.io.emit('shopItems', storeItems);
 	};
 
