@@ -16,6 +16,8 @@ const {
 	AFFIRMATIVE_WORDS_RESPONSE,
 	CHECKOUT_ORDER,
 	CHECKOUT_ORDER_RESPONSE,
+	CLEAR_CART,
+	CLEAR_CART_RESPONSE,
 	ORDER_HISTORY_RESPONSE,
 	CURRENT_ORDER_RESPONSE,
 	VIEW_SHOP_ITEMS_RESPONSE,
@@ -70,10 +72,12 @@ class socketHelper {
 		} else if (message == CHECKOUT_ORDER) {
 			botResponse = CHECKOUT_ORDER_RESPONSE;
 			displayOptions = 'checkout';
+		} else if (message == CLEAR_CART) {
+			botResponse = CLEAR_CART_RESPONSE;
+			displayOptions = 'checkout';
 		} else if (message == ORDER_HISTORY) {
 			botResponse = ORDER_HISTORY_RESPONSE;
 		} else if (message == CURRENT_ORDER) {
-			botResponse = CURRENT_ORDER_RESPONSE;
 			displayOptions = 'cart';
 		} else if (message == VIEW_SHOP_ITEMS) {
 			botResponse = VIEW_SHOP_ITEMS_RESPONSE;
