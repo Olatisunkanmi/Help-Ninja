@@ -17,7 +17,7 @@ class StoreService {
 	 */
 	static async getStoreItems() {
 		const store = await axios.get(
-			`https://fakestoreapi.com/products`,
+			`https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood`,
 		);
 		return store.data;
 	}
