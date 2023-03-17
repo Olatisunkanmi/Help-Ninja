@@ -5,6 +5,7 @@ const { _runBot, _displayOptions } = require('./socketHepler');
 const constants = require('../utils/constants');
 
 const {
+	EMPTY_CART,
 	CHAT_BEGINNING,
 	NEW_CONNECTION,
 	CHECKOUT,
@@ -65,6 +66,10 @@ class Socket {
 		socket.emit('notification', Helper(this.botName, message));
 	}
 
+	_clearUserCart(socket) {
+		socket.emit('clearCart');
+	}
+
 	/**
 	 * @private
 	 * @function _runBot
@@ -75,7 +80,8 @@ class Socket {
 	 */
 	_runBot = async (socket, msg) => {
 		let { botResponse, displayOptions } = socketHelper._runBot(msg);
-		this._emitBotMessage(socket, botResponse);
+
+		botResponse ? this._emitBotMessage(socket, botResponse) : null;
 		this._displayOptions(socket, displayOptions);
 
 		if (displayOptions === 'shopItems') {
@@ -128,22 +134,6 @@ class Socket {
 
 	/**
 	 * @private
-	 * @function _getTotal - calculates the total price of items in the cart
-	 * @param {object} data - cart items
-	 * @memberof Socket
-	 * @returns {number} total - returns the total price of items in the cart
-	 */
-
-	_getTotal(data) {
-		let total = 0;
-		data.forEach((item) => {
-			total += item.price;
-		});
-		return total;
-	}
-
-	/**
-	 * @private
 	 * @function _displayCart - displays the items in the cart
 	 * @param {object} socket
 	 * @param {object} data - cart items
@@ -152,10 +142,23 @@ class Socket {
 	 */
 
 	_displayCart(socket, data) {
+		let totalPrice = 0;
+
 		data.forEach((data) => {
-			this._emitBotMessage(socket, `${data.title} - $ ${data.price}`);
+			this._emitBotMessage(
+				socket,
+				`${data.strMeal} - $ ${new Intl.NumberFormat().format(
+					data.idMeal,
+				)}`,
+			);
+
+			//coverts the price to a number
+			data.idMeal = Number(data.idMeal);
+
+			totalPrice += data.idMeal;
 		});
-		this._emitBotMessage(socket, `Total: $ ${this._getTotal(data)}`);
+
+		this._emitBotMessage(socket, `Total Price: $ ${totalPrice}`);
 		this._emitBotMessage(socket, CHECKOUT);
 		this._emitBotMessage(socket, GO_TO_CART_PAGE);
 	}
@@ -174,7 +177,11 @@ class Socket {
 		socket.emit('fetchCart');
 
 		socket.on('cart', (data) => {
-			this._displayCart(socket, data);
+			if (data.length === 0) {
+				this._emitBotMessage(socket, EMPTY_CART);
+			} else {
+				this._displayCart(socket, data);
+			}
 		});
 	}
 
@@ -266,12 +273,15 @@ class Socket {
 				if (!msg) {
 					this._emitBotMessage(socket, SHOPPING_ERROR);
 				} else {
-					this._emitNotification(socket, SHOPPING_SUCCESS(msg.title));
+					this._emitNotification(
+						socket,
+						SHOPPING_SUCCESS(msg.strMeal),
+					);
 				}
 			});
 
 			socket.on('botMessage', (msg) => {
-				this._emitBotMessage(socket, DUPLICATE_ORDER(msg.title));
+				this._emitBotMessage(socket, DUPLICATE_ORDER(msg.strMeal));
 			});
 
 			//Emit options to user
