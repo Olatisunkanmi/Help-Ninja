@@ -48,7 +48,7 @@ module.exports = {
 		'okay',
 		'alright',
 	],
-	AFFIRMATIVE_WORDS_RESPONSE: `GREAT! I'M GLAD TO HEAR THAT`,
+	AFFIRMATIVE_WORDS_RESPONSE: `GREAT! I'M GLAD TO HEAR THAT </br> </br> Below are some of the things I can help you with `,
 	FAREWELL_WORDS: [
 		'bye',
 		'goodbye',
@@ -69,6 +69,7 @@ module.exports = {
 	],
 	APPRECIATION_WORDS_RESPONSE: `YOU'RE WELCOME!`,
 	INQUIRY_WORDS: [
+		'what are you',
 		'who',
 		'who are you',
 		'what is your name',
@@ -91,10 +92,14 @@ module.exports = {
 	HELP_WORDS_RESPONSE: `I CAN HELP YOU WITH THE FOLLOWING:`,
 
 	//SHOPPING
+	EMPTY_CART: 'Your cart is empty, Press 96 to view shop items',
 	ERROR_RESPONSE:
 		'Sorry, I did not understand, Help me understand by choosing from the following options:',
 	CHECKOUT_ORDER: '99',
 	CHECKOUT_ORDER_RESPONSE: 'Thank you for shopping with us.',
+	CLEAR_CART: '90',
+	CLEAR_CART_RESPONSE:
+		'Your cart has been cleared. Press 96 to view shop items',
 	ORDER_HISTORY: '98',
 	ORDER_HISTORY_RESPONSE: 'Your Order History is as follows:',
 	CURRENT_ORDER: '97',
