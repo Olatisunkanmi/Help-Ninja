@@ -9,32 +9,32 @@
 		/>
 
 		<!-- STYLE CSS -->
-		<link rel="stylesheet" href="css/style1.css" />
+		<link rel="stylesheet" href="css/chat.css" />
 	</head>
 
 	<body class="welcome-body">
 		<div class="wrapper">
-			<div class="inner">
-				<!-- <img src="images/nin.png" alt="" class="image-1" /> -->
-				<form action="" class="welcome-form">
-					<h3>Welcome to Ninja Bot</h3>
+			<ul class="chat-thread"></ul>
 
-					<div class="form-holder">
-						<span class="lnr lnr-lock"></span>
-						<input
-							type="text"
-							required
-							class="form-control"
-							placeholder="Username"
-						/>
-					</div>
-					<button>
-						<a href="./signup.html" class="signup-image-link"
-							>Get Access</a
-						>
-					</button>
-				</form>
+			<div class="chat-form chat-window">
+				<button class="go_to_cart">
+					<a href="./cart.html" class="cart-re"
+						><i class="fas fa-long-arrow-alt-left me-2"></i>Cart 🛒
+					</a>
+				</button>
+
+				<input
+					placeholder="Enter Chat"
+					class="chat-window-message"
+					name="chat-window-message"
+					type="text"
+					autocomplete="off"
+					autofocus
+				/>
 			</div>
 		</div>
+		<!-- JS -->
+		<script defer src="/socket.io/socket.io.js"></script>
+		<script defer src="js/chat.js"></script>
 	</body>
 </html>
