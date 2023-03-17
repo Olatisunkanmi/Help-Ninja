@@ -19,25 +19,37 @@ const sessionStorage = (() => {
 	const orderHistoryKey = 'orderHistory';
 
 	const setSession = (sessionKey, session) => {
-		return localStorage.setItem(cartKey, JSON.stringify(userCart));
+		return localStorage.setItem(sessionKey, JSON.stringify(session));
 	};
 
 	const getSession = (sessionKey) => {
 		return JSON.parse(localStorage.getItem(sessionKey)) || [];
 	};
 
+	const deleteSession = (sessionKey) => {
+		return localStorage.removeItem(sessionKey);
+	};
+
 	const _fetchOrderHistory = () => {
 		const orderHistory = getSession(orderHistoryKey);
 	};
 
-	const _createOrderHistory = (item) => {
-		const orderHistory = setSession(orderHistoryKey, item);
+	const _createOrderHistory = () => {
+		const data = getSession(cartKey) || [];
+		const existingOrderHistory = getSession(orderHistoryKey) || [];
+
+		const updatedOrderHistory = [...existingOrderHistory, ...data];
+
+		setSession(orderHistoryKey, updatedOrderHistory);
+		deleteSession(cartKey);
+
+		return updatedOrderHistory;
 	};
 
 	const _findItem = (item) => {
 		const userCart = getSession(cartKey);
 		const foundItem = userCart.find((cartItem) => {
-			return cartItem.id === item.id;
+			return cartItem.idMeal === item.idMeal;
 		});
 		return foundItem;
 	};
@@ -126,6 +138,11 @@ const uiController = (() => {
 		list.classList.add('store-items');
 		container.appendChild(list);
 
+		//convert Id to money string
+		const formatMoney = () => {
+			return;
+		};
+
 		items.forEach((item) => {
 			// Replace the placeholders in the HTML template with data from the item
 			const htmlTemplate = `<div class="container">
@@ -140,14 +157,17 @@ const uiController = (() => {
 		  </div>`;
 
 			const imgElement = document.createElement('img');
-			imgElement.src = item.image;
+			imgElement.src = item.strMealThumb;
 
 			let newHtml = htmlTemplate.replace(
 				'%image%',
 				imgElement.outerHTML,
 			);
-			newHtml = newHtml.replace('%img-text%', item.title);
-			newHtml = newHtml.replace('%img-desc%', item.description);
+			newHtml = newHtml.replace('%img-text%', item.strMeal);
+			newHtml = newHtml.replace(
+				'%img-desc%',
+				new Intl.NumberFormat().format(item.idMeal),
+			);
 
 			// Insert the new HTML into the list item element
 			list.insertAdjacentHTML('beforeend', newHtml);
@@ -238,7 +258,7 @@ const uiController = (() => {
 				},
 
 				appendItems: (items) => {
-					displayItems(items, (item) => item);
+					displayItems(items.meals, (item) => item);
 				},
 			};
 		},
@@ -334,26 +354,6 @@ const appController = ((
 	const { chatForm, chatThread, buyBtn } = getInputs();
 	const selectedItems = uiController.getUserSelectedItems();
 
-	//Get the session storage
-	// const { getItem, setItem } = sessionStorage;
-
-	const user = {
-		username: 'Guest',
-		email: 'user@mail.com',
-		cart: [
-			{
-				name: 'product1',
-				price: 100,
-				quantity: 1,
-			},
-			{
-				name: 'product2',
-				price: 200,
-				quantity: 1,
-			},
-		],
-	};
-
 	/**
 	 * @private
 	 * @returns {object} eventListeners
@@ -406,7 +406,7 @@ const appController = ((
 
 		if (item) {
 			const ifItemExist = findItemandAdd(item);
-			console.log(ifItemExist);
+
 			if (!ifItemExist) {
 				socket.emit('botMessage', item);
 			} else {
@@ -414,6 +414,12 @@ const appController = ((
 			}
 		}
 	};
+
+	const clearCart = () => {
+		sessionStorage._createOrderHistory();
+	};
+
+	socket.on('clearCart', clearCart);
 
 	//Listen to user chat input
 	chatForm.addEventListener('keypress', (e) => {
