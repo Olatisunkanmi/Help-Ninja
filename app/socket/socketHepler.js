@@ -77,6 +77,7 @@ class socketHelper {
 			displayOptions = 'checkout';
 		} else if (message == ORDER_HISTORY) {
 			botResponse = ORDER_HISTORY_RESPONSE;
+			displayOptions = 'orderHisttory';
 		} else if (message == CURRENT_ORDER) {
 			displayOptions = 'cart';
 		} else if (message == VIEW_SHOP_ITEMS) {
