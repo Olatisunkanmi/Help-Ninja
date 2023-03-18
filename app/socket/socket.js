@@ -24,7 +24,7 @@ class Socket {
 		this.server = server;
 		this.io = socket(server, { cors: { origin: '*' } });
 		this.botName = BOT_NAME;
-		this.userName = 'Olasunkanmi';
+		this.userName = 'User';
 	}
 
 	/**
