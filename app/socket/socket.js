@@ -81,6 +81,8 @@ class Socket {
 	_runBot = async (socket, msg) => {
 		let { botResponse, displayOptions } = socketHelper._runBot(msg);
 
+		console.log(displayOptions);
+
 		botResponse ? this._emitBotMessage(socket, botResponse) : null;
 		this._displayOptions(socket, displayOptions);
 
@@ -89,11 +91,15 @@ class Socket {
 		}
 
 		if (displayOptions === 'cart') {
-			this._emitUserItems(socket);
+			this._emitCartItems(socket);
 		}
 
 		if (displayOptions === 'checkout') {
 			this._clearUserCart(socket);
+		}
+
+		if (displayOptions === 'orderHisttory') {
+			this._emitOrderHistory(socket);
 		}
 	};
 
@@ -172,13 +178,35 @@ class Socket {
 	 * @memberof Socket
 	 * @returns {function} _displayCart - returns the items in the cart to the chatroom
 	 */
-
-	_emitUserItems(socket) {
+	_emitCartItems(socket) {
 		socket.emit('fetchCart');
 
 		socket.on('cart', (data) => {
 			if (data.length === 0) {
 				this._emitBotMessage(socket, EMPTY_CART);
+			} else {
+				this._displayCart(socket, data);
+			}
+		});
+	}
+
+	/**
+	 * @private
+	 * @function _emitOrderHistory - displays user order history
+	 * @param {object} socket
+	 * @emits fetchOrderHistory - Lets the server know that the user wants to view order history
+	 * @listens for orderHistory - receives the order history from local storage
+	 * @memberof Socket
+	 * @returns {function} _displayOrderHistory - returns the order history to the chatroom
+	 * @returns {function} _emitBotMessage - returns the order history to the chatroom
+	 */
+
+	_emitOrderHistory(socket) {
+		socket.emit('fetchOrderHistory');
+
+		socket.on('orderHistory', (data) => {
+			if (data.length === 0) {
+				this._emitBotMessage(socket, EMPTY_ORDER_HISTORY);
 			} else {
 				this._displayCart(socket, data);
 			}
