@@ -31,7 +31,7 @@ const sessionStorage = (() => {
 	};
 
 	const _fetchOrderHistory = () => {
-		const orderHistory = getSession(orderHistoryKey);
+		return getSession(orderHistoryKey);
 	};
 
 	const _createOrderHistory = () => {
@@ -356,10 +356,14 @@ const appController = ((
 
 	/**
 	 * @private
-	 * @returns {object} eventListeners
-	 * @summary This is the main controller
-	 * @memberof appController
+	 * @funtion init - initialize the app and listen for events
+	 * @listens for botMessage -  when the chatbot sends a message
+	 * @listens for notification - when the chatbot sends a notification
+	 * @listens for userMessage - when a user sends a message
+	 * @listens for shopItems - when the chatbot sends a list of items
+	 * @listens for fetchCart - when the chatbot sends a request for the cart
 	 */
+
 	const init = () => {
 		socket.on('botMessage', (message) => {
 			appendChat(message);
@@ -392,13 +396,30 @@ const appController = ((
 		return sessionStorage._fetchCart();
 	};
 
+	/**
+	 * @private
+	 * @function  findItemandAdd - find if an item exist in the cart
+	 * @param {object} userItem - user selected item
+	 * @returns {JSON || NULL } - if item exist return null else return the item
+	 */
+
 	const findItemandAdd = (userItem) => {
 		return sessionStorage._findItem(userItem)
 			? null
 			: sessionStorage._updateCart(userItem);
 	};
 
-	//Get user selected items and notify the server
+	/**
+	 * @private
+	 * @function updateCart - update the cart
+	 * @param {object} item - user selected item
+	 * @listens for updateCart - when the chatbot sends a request to update the cart
+	 * @emits botMessage - if item exist
+	 * @emits notification - if item does not exist || item exist in cart
+	 * @memberof appController
+	 * @summary update the cart with the user selected item and send a notification to the user
+	 */
+
 	const updateCart = (item) => {
 		if (!item) {
 			socket.emit('notification', item);
@@ -415,11 +436,38 @@ const appController = ((
 		}
 	};
 
+	/**
+	 * @private
+	 * @function clearCart - clear the cart
+	 * @summary clear the cart and moves cart to order history
+	 */
 	const clearCart = () => {
 		sessionStorage._createOrderHistory();
 	};
 
+	/**
+	 * @private
+	 * @function fectchOrderHistory - fetch the order history
+	 * @summary fetch the order history and send it to the server
+	 * @emits orderHistory
+	 * @memberof appController
+	 */
+
+	const fectchOrderHistory = () => {
+		const orderHistory = sessionStorage._fetchOrderHistory();
+		socket.emit('orderHistory', orderHistory);
+	};
+
+	/**
+	 * @private
+	 * @listen - listen for clearCart events from the server
+	 * @callback clearCart
+	 * @memberof appController
+	 */
+
 	socket.on('clearCart', clearCart);
+
+	socket.on('fetchOrderHistory', fectchOrderHistory);
 
 	//Listen to user chat input
 	chatForm.addEventListener('keypress', (e) => {
