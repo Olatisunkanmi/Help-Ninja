@@ -38,7 +38,17 @@ const sessionStorage = (() => {
 		const data = getSession(cartKey) || [];
 		const existingOrderHistory = getSession(orderHistoryKey) || [];
 
-		const updatedOrderHistory = [...existingOrderHistory, ...data];
+		const updatedOrderHistory = existingOrderHistory.slice();
+
+		data.forEach((item) => {
+			if (
+				!updatedOrderHistory.some(
+					(existingItem) => existingItem.id === item.id,
+				)
+			) {
+				updatedOrderHistory.push(item);
+			}
+		});
 
 		setSession(orderHistoryKey, updatedOrderHistory);
 		deleteSession(cartKey);
