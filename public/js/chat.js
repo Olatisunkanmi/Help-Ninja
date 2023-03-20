@@ -12,7 +12,9 @@
  * @returns {object} sessionStorage
  * @memberof sessionStorage
  * @description sessionStorage module
+ *
  */
+
 const sessionStorage = (() => {
 	const storageKey = 'userSession';
 	const cartKey = 'cartItems';
