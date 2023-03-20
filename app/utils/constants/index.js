@@ -69,10 +69,12 @@ module.exports = {
 	],
 	APPRECIATION_WORDS_RESPONSE: `YOU'RE WELCOME!`,
 	INQUIRY_WORDS: [
-		'what are you',
+		'who are you?',
+		'what are you?',
 		'who',
 		'who are you',
 		'what is your name',
+		'what is your name?',
 		'what do you do',
 	],
 	INQUIRY_WORDS_RESPONSE: `I'M HELP NINJA, YOUR PERSONAL SHOPPING ASSISTANT`,
