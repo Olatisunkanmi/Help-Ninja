@@ -1,5 +1,6 @@
 const StoreService = require('../services/store');
 const constants = require('../utils/constants');
+const Joi = require('joi');
 
 const {
 	APPRECIATION_WORDS,
@@ -122,6 +123,34 @@ class socketHelper {
 	static async _getStoreItems() {
 		return await StoreService.getStoreItems();
 	}
+
+	/**
+	 * @static
+	 * @function _validateUserInput - validates a string
+	 * @param {string} param - parameter to validate
+	 * @param {object} joiObject - joi object
+	 * @param {number} min - minimum length of the string
+	 * @param {number} max - maximum length of the string
+	 * @memberof socketHelper
+	 * @returns {object} joiObject - joi object
+	 */
+
+	static _messageSchema = Joi.object({
+		message: Joi.string()
+			.min(1)
+			.max(100)
+			.required()
+			.trim()
+			.empty(false)
+			.messages({
+				'any.required': 'Message is a required field',
+				'string.max':
+					'Message can not be greater than 100 characters',
+				'string.min': 'Message can not be less than 1 character',
+				'string.base': 'Message must be a string',
+				'string.empty': 'Message cannot be an empty field',
+			}),
+	});
 }
 
 module.exports = socketHelper;
