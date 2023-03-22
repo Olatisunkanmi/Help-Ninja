@@ -3,6 +3,8 @@ const Helper = require('../../config/helper');
 const socketHelper = require('./socketHepler');
 const { _runBot, _displayOptions } = require('./socketHepler');
 const constants = require('../utils/constants');
+const Joi = require('joi');
+const { INVALID_KEY } = require('../utils/constants');
 
 const {
 	EMPTY_CART,
@@ -114,10 +116,18 @@ class Socket {
 	 *
 	 */
 	_listenToChatMessage(socket) {
-		socket.on('chatMessage', (msg) => {
-			this._emitUserMessage(socket, msg);
+		socket.on('chatMessage', async (msg) => {
+			const { error, value } = socketHelper._messageSchema.validate({
+				message: msg,
+			});
 
-			this._runBot(socket, msg);
+			if (error) {
+				console.log(error.details[0].message);
+				this._emitBotMessage(socket, error.details[0].message);
+			} else {
+				this._emitUserMessage(socket, msg);
+				this._runBot(socket, msg);
+			}
 		});
 	}
 
